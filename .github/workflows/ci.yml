@@ -1,27 +1,27 @@
 name: Continuous Integration
- 
-on: 
+
+on:
   pull_request:
     branches:
       - master
- 
+
 jobs:
   test:
     runs-on: ubuntu-latest
- 
+
     strategy:
       matrix:
-        node-version: ['22.x']
+        node-version: ["22.x"]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-   
+
     services:
       postgres:
         image: postgres:14
         env:
-         POSTGRES_USER: postgres
-         POSTGRES_PASSWORD: mysecretpassword
-         POSTGRES_DB: forumapi_test
-         
+          POSTGRES_USER: ${{ secrets.PGUSER_TEST }}
+          POSTGRES_PASSWORD: ${{ secrets.PGPASSWORD_TEST }}
+          POSTGRES_DB: ${{ secrets.PGDATABASE_TEST }}
+
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -29,27 +29,32 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
- 
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install migrate and test
-      run: |
-        npm install
-        npm run migrate up
-        npm run test
-      env:
-        CI: true
-        HOST: localhost
-        PORT: 3000
-        PGHOST: localhost
-        PGPORT: 5432
-        PGUSER: postgres
-        PGPASSWORD: mysecretpassword
-        PGDATABASE: forumapi_test
-        ACCESS_TOKEN_KEY: secret
-        REFRESH_TOKEN_KEY: terces
-        ACCESS_TOKEN_AGE: 3000
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install migrate and test
+        run: |
+          npm install
+          npm run migrate up
+          npm run test
+        env:
+          CI: true
+          HOST: ${{ secrets.HOST_TEST }}
+          PORT: ${{ secrets.PORT_TEST }}
+          PGHOST: ${{ secrets.PGHOST_TEST }}
+          PGPORT: ${{ secrets.PGPORT_TEST }}
+          PGUSER: ${{ secrets.PGUSER_TEST }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD_TEST }}
+          PGDATABASE: ${{ secrets.PGDATABASE_TEST }}
+          PGHOST_TEST: ${{ secrets.PGHOST_TEST }}
+          PGPORT_TEST: ${{ secrets.PGPORT_TEST }}
+          PGUSER_TEST: ${{ secrets.PGUSER_TEST }}
+          PGPASSWORD_TEST: ${{ secrets.PGPASSWORD_TEST }}
+          PGDATABASE_TEST: ${{ secrets.PGDATABASE_TEST }}
+          ACCESS_TOKEN_KEY: ${{ secrets.ACCESS_TOKEN_KEY }}
+          REFRESH_TOKEN_KEY: ${{ secrets.REFRESH_TOKEN_KEY }}
+          ACCESS_TOKEN_AGE: ${{ secrets.ACCESS_TOKEN_AGE }}
